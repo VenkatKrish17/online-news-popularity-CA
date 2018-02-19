@@ -1,0 +1,6 @@
+Confusion matrix:
+              Least-Popular Average Popular Viral class.error
+Least-Popular          3452    1547     704   979   0.4833882
+Average                2211    2050    1268  1509   0.7087241
+Popular                1283    1461    1591  2158   0.7549669
+Viral                   950    1036    1312  3319   0.4984132

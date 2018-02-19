@@ -1,6 +1,10 @@
+#dependent libarires
+library(e1071)
+
 #normalizing shares using log normalization
 OnlineNewsPopularity$normalizedshare<-log(OnlineNewsPopularity$shares)
 #normalizing.. 
+modshares<-table(log(modifieddata$shares))
 rnormvalue<-rnorm(OnlineNewsPopularity$shares)
 skewness(rnormvalue)
 lognormvalue<-log(OnlineNewsPopularity$shares)
@@ -10,43 +14,119 @@ skewness(log10value)
 sqrtvalue<-(OnlineNewsPopularity$shares)
 skewness(sqrtvalue)
 
+OnlineNewsPopularity=NULL
 #picking log transformation as the right transformation model. running it for all the skewed columns
+OnlineNewsPopularity <- read.csv("E:/STUDIES/UNIT - 5/CA Practice/Mashable/OnlineNewsPopularity.csv") View(OnlineNewsPopularity)
 modifieddata=NULL
-modifieddata=cbind(OnlineNewsPopularity)
 #removing missing data i.e remvoing the n_token_content is 0
 modifieddata<-OnlineNewsPopularity[OnlineNewsPopularity[,4]!=0,]
+outlierremoved<-OnlineNewsPopularity[OnlineNewsPopularity[,4]!=0,]
 #removing irrelevant data - deleting non stop word with value 1042
-modifieddata<-modifieddata[modifieddata[,6]!=1042,]
+modifieddata<-modifieddata[modifieddata[,6]<=1,]
+outlierremoved<-outlierremoved[outlierremoved[,6]<=1,]
 
-skewness(modifieddata$n_non_stop_words)
-min(modifieddata[2])
 #finding skewness for all columns
-for( i in seq(2,61))
-  print(skewness(modifieddata[i]))
-for( i in seq(2,61))
-  print(OnlineNewsPopularity[i]==0)
+for( i in seq(2,61)){
+  print(names(modifieddata[i]))
+  print(skewness(modifieddata[,i]))
+}
+
+#plotting the target variable
+boxplot(modifieddata$shares,names = "Shares",main="Box plot on number of shares",
+        ylab="number of shares",sub="Before transformation")
+boxplot(modifieddata$normalizedshare,names = "Shares",main="Box plot on number of shares",
+        ylab="number of shares",sub="After transformation")
+#trasforming the target variable
+modifieddata$normalizedshare<-log(modifieddata$shares)
+hist(modifieddata$normalizedshare)
+hist(modifieddata$shares,main="Box plot on number of shares",
+        ylab="number of shares",xlab="frequency",sub="Before transformation")
+hist(modifieddata$normalizedshare,main="Histogram on number of shares",
+     xlab="normalized number of shares",ylab="frequency",sub="After transformation")
+
+
+
+#categorizing the target variable
+#removing the outliers in target variable
+boxplotstats<-boxplot(modifieddata$normalizedshare)$stats
+print(boxplotstats)
+minimum<-boxplotstats[,1][1]
+lowerhinge<-boxplotstats[,1][2]
+median<-boxplotstats[,1][3]
+upperhinge<-boxplotstats[,1][4]
+maximum<-boxplotstats[,1][5]
+#calculation for mild outliers 
+hspread<-upperhinge-lowerhinge
+lowerouterfence<-lowerhinge-3*hspread
+upperouterfence<-upperhinge+3*hspread
+print(hspread)
+print(lowerouterfence)
+print(upperouterfence)
+
+#removing values beyond the fences
+modifieddata<-modifieddata[!(modifieddata$normalizedshare>=upperouterfence | modifieddata$normalizedshare<=lowerouterfence),]
+boxplot(modifieddata$normalizedshare,xlab="Normalized Shares",main="Shares after extreme oulier removal")
+
+#modifieddata$popularity<-ifelse(modifieddata$normalizedshare>=7.90, modifieddata$popularity<-"Viral",ifelse((modifieddata$normalizedshare<7.90 & modifieddata$shares>=6.85),modifieddata$popularity<-"Popular",
+#                                modifieddata$popularity<-"Least-Popular"))
+
+#min(modifieddata$normalizedshare)
+#table(modifieddata$popularity)
+# three categories
+modifieddata$popularity<-cut(modifieddata$normalizedshare,c(lowerouterfence,lowerhinge,upperhinge,upperouterfence),labels=c("Least-Popular","Popular","Viral"))
+table(modifieddata$popularity)
+#four categories
+modifieddata$popularity<-cut(modifieddata$normalizedshare,c(lowerouterfence,lowerhinge,median,upperhinge,upperouterfence),labels=c("Least-Popular","Average","Popular","Viral"))
+table(modifieddata$popularity)
+#two categories
+modifieddata$popularity<-cut(modifieddata$normalizedshare,c(lowerouterfence,median,upperouterfence),labels=c("Flop","Hit"))
+table(modifieddata$popularity)
+
+
+#finding skewness for all columns
+for( i in seq(2,62)){
+  print(names(modifieddata[i]))
+  print(skewness(modifieddata[,i]))
+}
+#data balancing
+#sampling data to remove bias
+#how to do
+
+
+
+
+#splitting into training and testing data
+library(caret)
+sampledata<- createDataPartition(y=modifieddata$popularity,p = 0.8,groups = TRUE,list=FALSE)
+trainingdata<-modifieddata[sampledata,]
+testingdata<-modifieddata[-sampledata,]
+table(trainingdata$popularity)
+table(testingdata$popularity)
+
 #transformation !!!!!!!!
 for (i in seq(2,61)){
-  if(!(i %in% c(1,14,15,16,17,18,19,20,21,22,23,24,25,26,27,32,33,34,35,36,37,38,51,52,53,54,55,56,58)) & (skewness(modifieddata[i])>=2 | skewness(modifieddata[i])<=-2)){
+  if((i %in% c(4,6,8,9,10,11,21,23,24,27,28,29,30,31,52)) & (skewness(modifieddata[i])>=2 | skewness(modifieddata[i])<=-2)){
     
-    if(min(modifieddata[i])>0){
+    if(min(modifieddata[i])==0){
       print(names(modifieddata[i]))
-      modifieddata[i]<-log(modifieddata[i])
+      modifieddata[i]<-sqrt(modifieddata[i])
     }
     else{
       print(names(modifieddata[i]))
-      modifieddata[i]<-sqrt(modifieddata[i])
+      modifieddata[i]<-log(modifieddata[i])
     }
     
    
   }
 }
+
+
+
   
-  
+""" practice codes 
+ignore
 #outlier removal and creating categories
 #creating categories
-"""
-
 the target variable shares after normalization also, is very highly variant. 
 It has high outliers. to eliminate outliers and the variance in the data,
 and to balance the data.
@@ -55,7 +135,7 @@ table(modifieddata$popularity)
 
 NA Not popular     Popular 
 1615       17837       19010 
-"""
+
 modifieddata$popularity<-ifelse(modifieddata$shares<9.47 & modifieddata$shares>=7.24,modifieddata$popularity<-"Popular",
                                         ifelse(modifieddata$shares>5.27 & modifieddata$shares<7.24,modifieddata$popularity<-"Not popular",modifieddata$
                                                  popularity<-"NA"))
@@ -63,51 +143,17 @@ modifieddata$popularity<-ifelse(modifieddata$shares<9.47 & modifieddata$shares>=
 #removing NA's
 modifieddata<-modifieddata[modifieddata$popularity!='NA',]
 
-"""
 modifieddata<-modifieddata[modifieddata$popularity!='NA',]
 > table(modifieddata$popularity)
 
 Not popular     Popular 
 17837       19010 
-"""
+
 
 
 #grouping into two based on box plot stats
 
-""" oxfacts<-boxplot(OnlineNewsPopularity.normalizedshare)
-> boxfacts$stats
-[,1]
-[1,] 5.225747
-[2,] 6.852243
-[3,] 7.244228
-[4,] 7.937375
-[5,] 9.560997
-> table(OnlineNewsPopularity$normalizedshare<7.5)
 
-FALSE  TRUE 
-15200 24444 
-> table(OnlineNewsPopularity$normalizedshare<7.24)
-
-FALSE  TRUE 
-21154 18490 
-> table(OnlineNewsPopularity$normalizedshare>9.56)
-
-FALSE  TRUE 
-38269  1375 
-> table(OnlineNewsPopularity$normalizedshare<5.22)
-
-FALSE  TRUE 
-39487   157 
-> lm(OnlineNewsPopularity$num_keywords,OnlineNewsPopularity$normalizedshare)
-Error in formula.default(object, env = baseenv()) : invalid formula
-> table(OnlineNewsPopularity$normalizedshare<9.56 & OnlineNewsPopularity$normalizedshare>7.24)
-
-FALSE  TRUE 
-19865 19779 
-> table(OnlineNewsPopularity$normalizedshare>5.56 & OnlineNewsPopularity$normalizedshare<7.24)
-
-FALSE  TRUE 
-21384 18260 """
 #creating categories
 OnlineNewsPopularity$popularity<-ifelse(OnlineNewsPopularity$normalizedshare<9.56 & OnlineNewsPopularity$normalizedshare>=7.24,OnlineNewsPopularity$popularity<-"Popular",
                                         ifelse(OnlineNewsPopularity$normalizedshare>5.56 & OnlineNewsPopularity$normalizedshare<7.24,OnlineNewsPopularity$popularity<-"Not popular",OnlineNewsPopularity$
@@ -152,5 +198,5 @@ table(data_test$popularity,predict>0.5)
  plot(ROCRperf, colorize = TRUE)
 
  
- 
+ """
  

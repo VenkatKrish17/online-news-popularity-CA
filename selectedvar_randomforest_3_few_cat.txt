@@ -1,0 +1,20 @@
+Error matrix for the Random Forest model on modifieddata [test] (counts):
+
+               Predicted
+Actual          Least-Popular Popular Viral Error
+  Least-Popular           422     993    51  71.2
+  Popular                 315    2281   242  19.6
+  Viral                    75    1038   333  77.0
+
+Error matrix for the Random Forest model on modifieddata [test] (proportions):
+
+               Predicted
+Actual          Least-Popular Popular Viral Error
+  Least-Popular           7.3    17.3   0.9  71.2
+  Popular                 5.5    39.7   4.2  19.6
+  Viral                   1.3    18.1   5.8  77.0
+
+Overall error: 47.2%, Averaged class error: 55.93333%
+
+Rattle timestamp: 2018-02-19 17:54:53 Venkat
+======================================================================

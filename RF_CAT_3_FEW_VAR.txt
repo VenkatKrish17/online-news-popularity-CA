@@ -1,0 +1,61 @@
+Summary of the Random Forest Model
+==================================
+
+Number of observations used to build the model: 26830
+Missing value imputation is active.
+
+Call:
+ randomForest(formula = popularity ~ .,
+              data = crs$dataset[crs$sample, c(crs$input, crs$target)],
+              ntree = 500, mtry = 7, importance = TRUE, replace = FALSE, na.action = randomForest::na.roughfix)
+
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 7
+
+        OOB estimate of  error rate: 46.94%
+Confusion matrix:
+              Least-Popular Popular Viral class.error
+Least-Popular          1866    4477   339   0.7207423
+Popular                1401   10840  1290   0.1988767
+Viral                   313    4775  1529   0.7689285
+
+Variable Importance
+===================
+
+                              Least-Popular Popular Viral MeanDecreaseAccuracy MeanDecreaseGini
+self_reference_min_shares             19.47    3.20 30.75                31.14           473.47
+data_channel_is_socmed                16.70    6.72 23.86                24.82            38.93
+kw_avg_avg                            33.04   17.53 21.82                48.46           654.47
+self_reference_max_shares             16.71    4.38 20.72                24.15           451.83
+is_weekend                            74.69   15.51 15.95                53.60           117.58
+kw_max_avg                            24.11   18.60 14.14                37.60           623.13
+kw_min_min                             5.25   16.32 13.64                21.81           124.99
+num_hrefs                             13.60    8.94 10.85                20.53           389.02
+data_channel_is_entertainment         24.19    9.65  8.58                26.91            59.94
+LDA_00                                15.10   20.81  8.31                31.10           496.63
+kw_min_avg                            16.33   18.22  6.56                28.84           357.62
+n_tokens_content                       3.15   27.60  6.43                32.06           449.45
+global_subjectivity                    2.51   10.99  6.02                12.42           525.33
+n_tokens_title                         7.35    0.37  5.42                 6.33           306.48
+data_channel_is_tech                  17.22    7.18  5.22                18.27            47.51
+n_non_stop_words                       4.22   27.42  4.04                30.41           444.96
+LDA_01                                 8.15   16.13  3.95                20.83           488.00
+LDA_04                                14.27   20.36  3.21                27.50           503.34
+LDA_03                                 7.07   21.78  1.84                25.68           482.97
+n_unique_tokens                        5.89   24.25  1.56                26.37           479.74
+LDA_02                                15.78   15.63  0.63                27.39           510.32
+rate_negative_words                    8.52   12.84  0.07                15.74           462.52
+title_subjectivity                     5.59   -1.37 -0.11                 1.67           275.63
+n_non_stop_unique_tokens               8.46   26.99 -2.05                27.68           503.82
+num_keywords                           7.92   10.47 -2.39                13.32           161.84
+average_token_length                  13.50   10.39 -2.59                13.35           522.69
+data_channel_is_lifestyle              7.32    2.32 -5.26                 2.71            23.62
+global_sentiment_polarity              3.91   21.05 -5.50                15.77           505.60
+data_channel_is_bus                   12.24    8.57 -5.83                14.55            29.88
+data_channel_is_world                 18.63    4.61 -8.47                17.92            47.80
+
+Time taken: 3.22 mins
+
+Rattle timestamp: 2018-02-19 18:11:22 Venkat
+======================================================================
