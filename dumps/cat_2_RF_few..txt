@@ -1,0 +1,71 @@
+Summary of the Random Forest Model
+==================================
+
+Number of observations used to build the model: 26830
+Missing value imputation is active.
+
+Call:
+ randomForest(formula = popularity ~ .,
+              data = crs$dataset[crs$sample, c(crs$input, crs$target)],
+              ntree = 1000, mtry = 5, importance = TRUE, replace = FALSE, na.action = randomForest::na.roughfix)
+
+               Type of random forest: classification
+                     Number of trees: 1000
+No. of variables tried at each split: 5
+
+        OOB estimate of  error rate: 33.63%
+Confusion matrix:
+            Below-Level Above-Level class.error
+Below-Level        9342        4378   0.3190962
+Above-Level        4644        8466   0.3542334
+
+Analysis of the Area Under the Curve (AUC)  
+==========================================
+
+Call:
+roc.default(response = crs$rf$y, predictor = as.numeric(crs$rf$predicted))
+
+Data: as.numeric(crs$rf$predicted) in 13720 controls (crs$rf$y Below-Level) < 13110 cases (crs$rf$y Above-Level).
+Area under the curve: 0.6633
+
+95% CI: 0.6577-0.669 (DeLong)
+
+Variable Importance
+===================
+
+                              Below-Level Above-Level MeanDecreaseAccuracy MeanDecreaseGini
+kw_avg_avg                          57.54       26.02                79.50           525.57
+is_weekend                          77.31       32.87                76.97           132.73
+self_reference_min_shares           34.61       50.76                70.90           427.87
+kw_max_avg                          50.37       19.85                60.86           491.22
+LDA_00                              35.69       30.64                57.97           383.61
+LDA_02                              43.45        2.39                52.51           423.19
+kw_min_avg                          42.93        5.20                50.75           300.45
+data_channel_is_socmed              14.24       51.90                50.56            53.10
+n_unique_tokens                     30.71       23.56                49.57           377.41
+n_non_stop_words                    31.12       19.31                48.53           343.99
+n_tokens_content                    29.82       22.72                48.28           348.64
+data_channel_is_entertainment       43.93       12.68                47.63            88.86
+LDA_04                              36.16       13.98                46.57           380.40
+self_reference_max_shares           19.49       35.35                46.46           354.30
+LDA_01                              34.12       18.20                44.36           385.04
+LDA_03                              39.44        6.19                42.02           358.16
+n_non_stop_unique_tokens            30.02       14.72                37.60           373.34
+num_hrefs                           28.63       14.83                35.41           291.67
+global_sentiment_polarity           36.95       -0.68                34.17           385.45
+data_channel_is_world               32.85      -24.11                32.17            64.62
+data_channel_is_tech                23.34       14.39                31.99            50.83
+average_token_length                44.01       -6.18                31.82           384.60
+rate_positive_words                 25.70        9.71                28.05           343.75
+global_subjectivity                 20.92       11.79                25.06           398.04
+num_keywords                        21.60        4.53                23.51           130.67
+data_channel_is_bus                 21.72       -3.19                22.97            29.09
+title_sentiment_polarity            17.65        3.83                16.62           217.06
+title_subjectivity                  14.34        1.80                12.55           192.14
+n_tokens_title                       9.69        1.91                 8.55           214.97
+data_channel_is_lifestyle           17.13      -15.55                 2.40            20.39
+
+Time taken: 4.32 mins
+
+Rattle timestamp: 2018-02-19 19:02:07 Venkat
+======================================================================
