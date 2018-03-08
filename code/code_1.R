@@ -1,8 +1,18 @@
 #dependent libarires
+library(lattice)
+library(ggplot2)
 library(e1071)
 library(caret)
+library(pROC)
+library(randomForest)
 
+library(neuralnet)
+
+OnlineNewsPopularity <- read.csv("../data set/OnlineNewsPopularity.csv")
+View(OnlineNewsPopularity)
+"""
 #normalizing shares using log normalization
+trying out various normalization for better results
 OnlineNewsPopularity$normalizedshare<-log(OnlineNewsPopularity$shares)
 #normalizing different ways to check skewness.. 
 modshares<-table(log(modifieddata$shares))
@@ -14,10 +24,10 @@ log10value<-log10(OnlineNewsPopularity$shares)
 skewness(log10value)
 sqrtvalue<-(OnlineNewsPopularity$shares)
 skewness(sqrtvalue)
-
+"""
 # actual code starts here
 #picking log transformation as the right transformation model. running it for all the skewed columns
-OnlineNewsPopularity <- read.csv("E:/STUDIES/UNIT - 5/CA Practice/Mashable/OnlineNewsPopularity.csv") View(OnlineNewsPopularity)
+
 modifieddata=NULL
 #removing missing data i.e removing the n_token_content is 0
 modifieddata<-OnlineNewsPopularity[OnlineNewsPopularity[,4]!=0,]
@@ -32,13 +42,16 @@ for( i in seq(2,61)){
   print(skewness(modifieddata[,i]))
 }
 #processing the target variable
+#normalziing the target variable and storing it in new variable
+modifieddata$normalizedshare<-log(modifieddata$shares)
 #plotting the target variable
+
 boxplot(modifieddata$shares,names = "Shares",main="Box plot on number of shares",
         ylab="number of shares",sub="Before transformation")
 boxplot(modifieddata$normalizedshare,names = "Shares",main="Box plot on number of shares",
         ylab="number of shares",sub="After transformation")
 #trasforming the target variable
-modifieddata$normalizedshare<-log(modifieddata$shares)
+
 hist(modifieddata$normalizedshare)
 hist(modifieddata$shares,main="Box plot on number of shares",
         ylab="number of shares",xlab="frequency",sub="Before transformation")
@@ -47,7 +60,6 @@ hist(modifieddata$normalizedshare,main="Histogram on number of shares",
 
 
 
-#categorizing the target variable
 #removing the outliers in target variable
 boxplotstats<-boxplot(modifieddata$normalizedshare)$stats
 print(boxplotstats)
@@ -72,37 +84,14 @@ boxplot(modifieddata$normalizedshare,xlab="Normalized Shares",main="Shares after
 #                                modifieddata$popularity<-"Least-Popular"))
 
 #min(modifieddata$normalizedshare)
-#table(modifieddata$popularity)
-# three categories
-modifieddata$popularity<-cut(modifieddata$normalizedshare,c(lowerouterfence,lowerhinge,upperhinge,upperouterfence),labels=c("Least-Popular","Popular","Viral"))
-table(modifieddata$popularity)
-#four categories
-modifieddata$popularity<-cut(modifieddata$normalizedshare,c(lowerouterfence,lowerhinge,median,upperhinge,upperouterfence),labels=c("Least-Popular","Average","Popular","Viral"))
-table(modifieddata$popularity)
-#two categories
-modifieddata$popularity<-cut(modifieddata$normalizedshare,c(lowerouterfence,median,upperouterfence),labels=c("Flop","Hit"))
-table(modifieddata$popularity)
 
-
+#removing skewness in other columns
 #finding skewness for all columns
 for( i in seq(2,62)){
   print(names(modifieddata[i]))
   print(skewness(modifieddata[,i]))
 }
-#data balancing
-#sampling data to remove bias
-#how to do
 
-
-
-
-#splitting into training and testing data
-
-sampledata<- createDataPartition(y=modifieddata$popularity,p = 0.8,groups = TRUE,list=FALSE)
-trainingdata<-modifieddata[sampledata,]
-testingdata<-modifieddata[-sampledata,]
-table(trainingdata$popularity)
-table(testingdata$popularity)
 
 #transformation !!!!!!!!
 for (i in seq(2,61)){
@@ -116,15 +105,215 @@ for (i in seq(2,61)){
       print(names(modifieddata[i]))
       modifieddata[i]<-log(modifieddata[i])
     }
-    
-   
-  }
+      }
 }
 
 
+#binning or categorizing the data
+#table(modifieddata$popularity)
+# three categories
+modifieddata$popularity<-cut(modifieddata$normalizedshare,c(lowerouterfence,lowerhinge,upperhinge,upperouterfence),labels=c("Least-Popular","Popular","Viral"))
+table(modifieddata$popularity)
+#four categories
+modifieddata$popularity<-cut(modifieddata$normalizedshare,c(lowerouterfence,lowerhinge,median,upperhinge,upperouterfence),labels=c("Least-Popular","Average","Popular","Viral"))
+table(modifieddata$popularity)
+#two categories
+modifieddata$popularity<-cut(modifieddata$normalizedshare,c(lowerouterfence,median,upperouterfence),labels=c("Flop","Hit"))
+table(modifieddata$popularity)
 
-  
-""" practice codes 
+
+
+
+#splitting into training and testing data
+
+  sampledata<- createDataPartition(y=modifieddata$popularity,p = 0.8,groups = TRUE,list=FALSE)
+  trainingdata<-modifieddata[sampledata,]
+  testingdata<-modifieddata[-sampledata,]
+  table(trainingdata$popularity)
+  table(testingdata$popularity)
+
+
+
+#modelling 
+#important attributes ?
+""" 
+from random forest 
+kw_avg_avg
+self_reference_min_shares
+kw_max_avg
+timedelta
+self_reference_avg_sharess
+is_weekend
+LDA_00
+kw_min_avg
+LDA_02
+n_tokens_content
+n_unique_tokens
+LDA_04
+data_channel_is_entertainment
+LDA_01
+data_channel_is_socmed
+n_non_stop_words
+self_reference_max_shares
+n_non_stop_unique_tokens
+num_imgs
+kw_avg_max
+LDA_03
+kw_avg_min
+kw_min_max
+data_channel_is_tech
+rate_positive_words
+num_hrefs
+global_subjectivity
+global_sentiment_polarity
+rate_negative_words
+global_rate_positive_words
+weekday_is_saturday
+average_token_length
+kw_max_min
+global_rate_negative_words
+"""
+"""
+final flitering
+kw_avg_avg
+kw_max_avg
+kw_min_avg
+time_delta
+self_reference_avg_sharess
+n_tokens_content
+n_unique_tokens
+is_weekend
+LDA_00
+LDA_01
+LDA_02
+LDA_03
+LDA_04
+data_channel_is_entertainment
+data_channel_is_tech
+data_channel_is_socmed
+n_non_stop_words
+n_non_stop_unique_tokens
+num_imgs
+num_hrefs
+global_subjectivity
+global_sentiment_polarity
+average_token_length
+rate_positive_words
+num_hrefs
+rate_negative_words
+global_rate_positive_words
+global_rate_negative_words
+
+"""
+
+
+#formula 
+
+formulaString<-"popularity~kw_avg_avg+
+kw_max_avg+
+kw_min_avg+
+timedelta+
+self_reference_avg_sharess+
+n_tokens_content+
+n_unique_tokens+
+is_weekend+
+LDA_00+
+LDA_01+
+LDA_02+
+LDA_03+
+LDA_04+
+data_channel_is_entertainment+
+data_channel_is_tech+
+data_channel_is_socmed+
+n_non_stop_words+
+n_non_stop_unique_tokens+
+num_imgs+
+num_hrefs+
+global_subjectivity+
+global_sentiment_polarity+
+average_token_length+
+rate_positive_words+
+num_hrefs+
+rate_negative_words+
+global_rate_positive_words+
+global_rate_negative_words"
+
+#logistic model
+#to build a logistic regression , creating the popularity column as 0 & 1
+modifieddata$popularity<-ifelse(modifieddata$popularity=="Hit",modifieddata$popularity<-1,modifieddata$popularity<-0)
+table(modifieddata$popularity)
+
+
+# Step 1: Build Logit Model on Training Dataset
+logitMod <- glm(as.formula(formulaString), family="binomial", data = trainingdata)
+
+# Step 2: Predict Y on Test Dataset
+predictedY <- predict(logitMod, testingdata, type="response") 
+predictedbinary<-ifelse(predictedY>=0.5,1,0)
+table(testingdata$popularity)
+confusionMatrix(predictedbinary,testingdata$popularity)
+
+#ROC curve
+ROCPredict<-roc(predictedbinary,testingdata$popularity)
+plot(ROCPredict)
+
+"""
+Confusion Matrix and Statistics
+
+Reference
+Prediction    0    1
+0 2628 1365
+1 1279 2393
+
+Accuracy : 0.6551          
+95% CI : (0.6443, 0.6657)
+No Information Rate : 0.5097          
+P-Value [Acc > NIR] : < 2e-16         
+
+Kappa : 0.3095          
+Mcnemar's Test P-Value : 0.09832         
+                                          
+            Sensitivity : 0.6726          
+            Specificity : 0.6368          
+         Pos Pred Value : 0.6582          
+         Neg Pred Value : 0.6517          
+             Prevalence : 0.5097          
+         Detection Rate : 0.3429          
+   Detection Prevalence : 0.5209          
+      Balanced Accuracy : 0.6547          
+                                          
+       'Positive' Class : 0
+"""
+
+#reverting back to categorical values
+modifieddata$popularity<-ifelse(modifieddata$popularity==1,modifieddata$popularity<-"Hit",modifieddata$popularity<-"Flop")  
+table(modifieddata$popularity)
+
+#Random forest model for 2 category data
+#hoping for a better performance
+
+rfresults<-randomForest(as.formula(formulaString),data=trainingdata,mtry=7,ntree=500)
+plot(rfresults, main="Random forest error rate")
+
+rfprediction<-predict(rfresults,testingdata)
+#print(rfprediction)
+confusionMatrix(rfprediction,testingdata$popularity)
+ROCRF<-roc(rfprediction,testingdata$popularity)
+print(ROCRF)
+plot(ROCRF)
+
+
+#SVM
+#may work.. may not work.. 
+svm_results<-svm(as.formula(formulaString),data=trainingdata)
+svmprediction<-predict(svm_results,testingdata,type="response")
+confusionMatrix(svmprediction,testingdata$popularity)
+ROCSVM<-roc(svmprediction,testingdata$popularity)
+print(ROCSVM)
+plot(ROCSVM)
+
+"""
+practice codes 
 ignore
 #outlier removal and creating categories
 #creating categories

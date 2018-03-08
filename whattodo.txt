@@ -1,0 +1,21 @@
+action items ---- 
+document --  transformation 
+
+so we assume we have cleaned data
+-----------------------------------
+3 models, 4 categories, (SVM , RF )3 categories (SVM, RF), 2 catgories(logistic, SVM,RF)
+Fine tune - SVM, RF
+Learning and validation curves
+
+Model evaluation - 
+	ROC
+	Confusion matrix	precision, sensititvy
+	avg class error. 
+
+Conclusion
+	suggest the right model.
+	what could have been better
+	what was better
+
+
+
