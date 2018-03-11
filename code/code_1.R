@@ -102,7 +102,7 @@ for (i in seq(2,61)){
       modifieddata[i]<-sqrt(modifieddata[i])
     }
     else{
-      print(names(modifieddata[i]))
+      print(names(modifieddata[i]) )
       modifieddata[i]<-log(modifieddata[i])
     }
       }
@@ -233,7 +233,6 @@ global_subjectivity+
 global_sentiment_polarity+
 average_token_length+
 rate_positive_words+
-num_hrefs+
 rate_negative_words+
 global_rate_positive_words+
 global_rate_negative_words"
@@ -291,13 +290,14 @@ table(modifieddata$popularity)
 
 #Random forest model for 2 category data
 #hoping for a better performance
-
-rfresults<-randomForest(as.formula(formulaString),data=trainingdata,mtry=7,ntree=500)
+rfresults<-randomForest(as.formula(formulaString),data=trainingdata,mtry=8,ntree=500)
 plot(rfresults, main="Random forest error rate")
-
+#randomForest.crossValidation(rfresults,modifieddata,p=0.1,n=10, plot=TRUE, ntree=500)
 rfprediction<-predict(rfresults,testingdata)
 #print(rfprediction)
-confusionMatrix(rfprediction,testingdata$popularity)
+confusionMatrix(rfpredictionbinary,testingdata$popularity)
+line(rfprediction)
+rfpredictionbinary<-ifelse(rfprediction <= 0.5 ,  rfpredictionbinary<-0, rfpredictionbinary <- 1) 
 ROCRF<-roc(rfprediction,testingdata$popularity)
 print(ROCRF)
 plot(ROCRF)
@@ -311,6 +311,39 @@ confusionMatrix(svmprediction,testingdata$popularity)
 ROCSVM<-roc(svmprediction,testingdata$popularity)
 print(ROCSVM)
 plot(ROCSVM)
+
+
+chunksize<-NROW(trainingdata)%/%10
+print(chunksize)
+learnings<-data.frame(m = integer(10),
+                      dfsize=integer(10),
+                      cvaccuracy = integer(10))
+for (i in seq(1,10)){
+  learnings$m[i]<-i
+  learnings$dfsize[i]<-i*chunksize+3
+  #logitMod <<- glm(as.formula(formulaString), family="binomial", data = trainingdata[1:(i*chunksize)+3,])
+  
+  # Step 2: Predict Y on Test Dataset
+  #predictedY <<- predict(logitMod, testingdata, type="response") 
+  
+  rfmodel<-randomForest(as.formula(formulaString),data = trainingdata[1:(i*chunksize)+3,],ntree=500,mtry=7)
+  predictedY <<- predict(rfmodel, testingdata, type="response")
+  #continuous to categorical
+  predictedbinary<<-ifelse(predictedY >= 0.5,1,0)
+  cm<-confusionMatrix(predictedbinary,testingdata$popularity)
+  print(cm)
+  learnings$cvaccuracy[i]<-cm$overall['Accuracy']
+  
+  
+  
+  
+}
+
+print(learnings)
+plot(learnings$dfsize,learnings$cvaccuracy,type="o",main="Learning curve", xlab="data chunk size",ylab="prediction accuracy")
+
+
+
 
 """
 practice codes 
